@@ -14,7 +14,7 @@ Have you ever been in the middle of an at-bat and wondered what pitch to throw n
 3. View the ranked recommendations and success metrics.
 
 ## Data Source
-This app uses Statcast data from the last three years.
+This app uses subset of Statcast data from the last three years. 
 
 ## Technologies Used
 - **Python**
