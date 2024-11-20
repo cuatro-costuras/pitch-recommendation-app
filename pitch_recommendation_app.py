@@ -17,17 +17,30 @@ pitch_type_mapping = {
     "CS": "Slow Curve",
 }
 
-# Load the filtered dataset
+# Function to load and filter the dataset
 @st.cache_data
-def load_data(file_path):
-    data = pd.read_csv(file_path)
+def load_filtered_data(file_path):
+    # Define the columns to keep
+    columns_to_keep = ['pitch_type', 'p_throws', 'stand', 'events', 'description', 'launch_speed', 'year']
+    
+    # Load the compressed file with selected columns
+    data = pd.read_csv(file_path, usecols=columns_to_keep)
+    
+    # Filter for recent years
+    data = data[data['year'] >= 2021]
+    
     # Map pitch types to full names
     data['pitch_type'] = data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
-    # Remove rows with unmapped pitch types
+    # Remove unmapped pitch types
     data = data[data['pitch_type'] != 'Unknown']
+    
     return data
 
-data = load_data('smaller_statcast.csv')
+# Path to the compressed file
+file_path = 'statcast_last_3_years.csv.gz'
+
+# Load the filtered data
+data = load_filtered_data(file_path)
 
 # Define success criteria
 data['success'] = (
@@ -50,11 +63,7 @@ st.write(
     "Use our tool to find what pitches are most successful after the pitch you just threw."
 )
 
-st.write(
-    "**Disclaimer:** This tool uses a reduced dataset containing approximately 10,000 rows of Statcast data "
-    "filtered from the last three years. The data includes only the most relevant columns and may not fully represent "
-    "all pitch types or sequences present in the original Statcast dataset."
-)
+st.write("**Disclaimer:** This tool uses a reduced dataset filtered for relevant columns and years from Statcast data (2021 onwards).")
 
 # Dropdowns for filters
 prev_pitch_type = st.selectbox(
