@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import requests
-import os
 from io import BytesIO
 
 # Dictionary to map pitch acronyms to full names
@@ -20,11 +19,11 @@ pitch_type_mapping = {
     "CS": "Slow Curve",
 }
 
-# Function to download and load monthly files from GitHub
+# Function to download and load all monthly files from GitHub
 @st.cache_data
 def load_all_data_from_github():
     # Base URL for your GitHub repository
-    base_url = "https://github.com/cuatro-costuras/pitch-recommendation-app"
+    base_url = "https://raw.githubusercontent.com/cuatro-costuras/pitch-recommendation-app/main/"
 
     # Initialize an empty DataFrame
     combined_data = pd.DataFrame()
@@ -34,6 +33,9 @@ def load_all_data_from_github():
         for month in range(1, 13):
             file_name = f'statcast_{year}_{month:02d}.csv.gz'
             file_url = f"{base_url}{file_name}"
+            
+            # Debugging message
+            st.write(f"Attempting to download: {file_url}")
 
             try:
                 # Download the file from GitHub
@@ -51,8 +53,8 @@ def load_all_data_from_github():
                 # Append to the combined DataFrame
                 combined_data = pd.concat([combined_data, data], ignore_index=True)
 
-            except requests.exceptions.HTTPError:
-                st.warning(f"File not found on GitHub: {file_name}")
+            except requests.exceptions.HTTPError as http_err:
+                st.warning(f"HTTP Error for file: {file_name} - {http_err}")
             except Exception as e:
                 st.error(f"Error loading file {file_name}: {e}")
 
