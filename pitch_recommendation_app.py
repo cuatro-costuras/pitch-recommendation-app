@@ -1,7 +1,5 @@
 import pandas as pd
 import streamlit as st
-import requests
-from io import BytesIO
 
 # Dictionary to map pitch acronyms to full names
 pitch_type_mapping = {
@@ -19,52 +17,27 @@ pitch_type_mapping = {
     "CS": "Slow Curve",
 }
 
-# Function to download and load 2024 monthly files from GitHub
+# Function to load the smaller dataset
 @st.cache_data
-def load_2024_data():
-    # Base URL for your GitHub repository
-    base_url = "https://raw.githubusercontent.com/cuatro-costuras/pitch-recommendation-app/main/"
+def load_data():
+    # Path to the smaller CSV file
+    file_path = 'smaller_statcast.csv'  # Adjust this path if needed
 
-    # Initialize an empty DataFrame
-    combined_data = pd.DataFrame()
+    # Load the data
+    data = pd.read_csv(file_path)
 
-    # Loop through 2024 monthly files
-    for month in range(1, 13):  # Months 1 to 12
-        file_name = f'statcast_2024_{month:02d}.csv.gz'
-        file_url = f"{base_url}{file_name}"
-        
-        # Debugging message
-        st.write(f"Attempting to download: {file_url}")
+    # Map pitch types to full names
+    data['pitch_type'] = data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
+    data = data[data['pitch_type'] != 'Unknown']  # Remove unmapped pitch types
 
-        try:
-            # Download the file from GitHub
-            response = requests.get(file_url)
-            response.raise_for_status()  # Ensure the request was successful
-            file_content = BytesIO(response.content)
+    return data
 
-            # Load the file content into a DataFrame
-            data = pd.read_csv(file_content, compression='gzip')
-
-            # Map pitch types to full names
-            data['pitch_type'] = data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
-            data = data[data['pitch_type'] != 'Unknown']  # Remove unmapped pitch types
-
-            # Append to the combined DataFrame
-            combined_data = pd.concat([combined_data, data], ignore_index=True)
-
-        except requests.exceptions.HTTPError as http_err:
-            st.warning(f"HTTP Error for file: {file_name} - {http_err}")
-        except Exception as e:
-            st.error(f"Error loading file {file_name}: {e}")
-
-    return combined_data
-
-# Load 2024 data
-data = load_2024_data()
+# Load the data
+data = load_data()
 
 # Ensure data is loaded before continuing
 if data.empty:
-    st.error("No data available. Please ensure the 2024 data files are uploaded to GitHub.")
+    st.error("No data available. Please ensure the smaller CSV file is uploaded.")
 else:
     # Define success criteria
     data['success'] = (
@@ -87,7 +60,7 @@ else:
         "Use our tool to find what pitches are most successful after the pitch you just threw."
     )
 
-    st.write("**Disclaimer:** This tool uses all available Statcast data from 2024.")
+    st.write("**Disclaimer:** This tool uses a subset of Statcast data for demonstration purposes.")
 
     # Dropdowns for filters
     prev_pitch_type = st.selectbox(
