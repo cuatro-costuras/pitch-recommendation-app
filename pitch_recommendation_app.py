@@ -21,17 +21,32 @@ pitch_type_mapping = {
 @st.cache_data
 def load_filtered_data(file_path, year_filter=2021):
     chunks = pd.read_csv(file_path, chunksize=500000)
-    
-    # Filter the data by year
-    filtered_data = pd.concat(
-        [chunk[chunk['year'] >= year_filter] for chunk in chunks if 'year' in chunk.columns],
-        ignore_index=True
-    )
-    
+
+    filtered_chunks = []
+    for chunk in chunks:
+        # Print available columns for debugging
+        print(f"Chunk columns: {chunk.columns.tolist()}")
+
+        if 'year' in chunk.columns:  # Ensure the 'year' column exists
+            filtered_chunk = chunk[chunk['year'] >= year_filter]  # Filter by year
+            print(f"Filtered chunk rows: {filtered_chunk.shape[0]}")  # Debugging info
+            if not filtered_chunk.empty:
+                filtered_chunks.append(filtered_chunk)
+
+    # Concatenate all filtered chunks or return an empty DataFrame if no data matches
+    if filtered_chunks:
+        filtered_data = pd.concat(filtered_chunks, ignore_index=True)
+    else:
+        print("No data matched the filtering criteria.")
+        filtered_data = pd.DataFrame(columns=['pitch_type', 'p_throws', 'stand', 'events', 'description', 'launch_speed', 'year'])
+
     # Map pitch types to full names
-    filtered_data['pitch_type'] = filtered_data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
-    filtered_data = filtered_data[filtered_data['pitch_type'] != 'Unknown']  # Remove rows with unmapped pitch types
-    
+    if 'pitch_type' in filtered_data.columns:
+        filtered_data['pitch_type'] = filtered_data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
+        filtered_data = filtered_data[filtered_data['pitch_type'] != 'Unknown']  # Remove unmapped rows
+    else:
+        print("Warning: 'pitch_type' column is missing in the data.")
+
     return filtered_data
 
 # Load the filtered dataset (only data from 2021 and later)
@@ -47,7 +62,10 @@ data['success'] = (
 )
 
 # Add a column for the previous pitch type
-data['prev_pitch_type'] = data['pitch_type'].shift(1)
+if 'pitch_type' in data.columns:
+    data['prev_pitch_type'] = data['pitch_type'].shift(1)
+else:
+    data['prev_pitch_type'] = None  # Handle missing column gracefully
 
 # Streamlit App
 st.title("Pitch Sequence Success Rates")
@@ -63,19 +81,19 @@ st.write("**Disclaimer:** Data is sourced from the last 3 years of Statcast data
 # Dropdowns for filters
 prev_pitch_type = st.selectbox(
     "Select Previous Pitch Type",
-    options=data['pitch_type'].unique(),
+    options=data['pitch_type'].unique() if 'pitch_type' in data.columns else [],
     index=0
 )
 
 pitcher_hand = st.selectbox(
     "Select Pitcher Handedness",
-    options=data['p_throws'].unique(),
+    options=data['p_throws'].unique() if 'p_throws' in data.columns else [],
     index=0
 )
 
 hitter_hand = st.selectbox(
     "Select Hitter Handedness",
-    options=data['stand'].unique(),
+    options=data['stand'].unique() if 'stand' in data.columns else [],
     index=0
 )
 
