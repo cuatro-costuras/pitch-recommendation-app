@@ -121,3 +121,22 @@ else:
         - **Occurrences**: The number of times the selected pitch sequence occurred.
         """
     )
+
+    # Add a glossary of pitch types
+    st.write("### Glossary of Pitch Types (Baseball Savant)")
+    st.write(
+        """
+        - **Four-Seam Fastball (FF)**: A high-velocity pitch thrown with backspin, resulting in minimal movement and a straight trajectory.
+        - **Slider (SL)**: A breaking pitch that combines the velocity of a fastball with the movement of a curveball. Exhibits sharp, late horizontal break.
+        - **Curveball (CU)**: A slower pitch with significant downward movement caused by topspin. Follows a looping trajectory to deceive hitters.
+        - **Changeup (CH)**: An off-speed pitch designed to mimic a fastball but thrown at a reduced velocity to disrupt timing.
+        - **Splitter (FS)**: A pitch that appears similar to a fastball but drops sharply near the plate due to a "split-finger" grip.
+        - **Sinker (SI)**: A fastball variant with heavy downward and horizontal movement, designed to induce ground balls.
+        - **Cutter (FC)**: A fastball with late movement, slightly breaking away from the pitcher's arm side.
+        - **Knuckle Curve (KC)**: A curveball thrown with a grip that reduces spin, combining knuckleball and curveball movement.
+        - **Knuckleball (KN)**: A pitch with minimal spin, causing erratic movement due to air resistance.
+        - **Sweeper (SV)**: A slider variant with an exaggerated horizontal break across the plate.
+        - **Sweeping Curve (ST)**: A curveball with added horizontal movement alongside its vertical drop.
+        - **Slow Curve (CS)**: A slower version of the curveball, emphasizing significant break and a looping trajectory.
+        """
+    )
