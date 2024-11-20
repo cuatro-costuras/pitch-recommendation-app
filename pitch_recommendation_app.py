@@ -57,7 +57,7 @@ else:
     # Add the descriptive message
     st.write(
         "Have you ever been in the middle of an at-bat and wondered what pitch to throw next? "
-        "Use our tool to find what pitches are most successful after the pitch you just threw."
+        "Use our tool to see what pitches are most successful after the pitch you just threw."
     )
 
     st.write("**Disclaimer:** This tool uses a subset of Statcast data for demonstration purposes.")
