@@ -50,7 +50,11 @@ st.write(
     "Use our tool to find what pitches are most successful after the pitch you just threw."
 )
 
-st.write("**Disclaimer:** Data is sourced from the smaller version of Statcast data.")
+st.write(
+    "**Disclaimer:** This tool uses a reduced dataset containing approximately 10,000 rows of Statcast data "
+    "filtered from the last three years. The data includes only the most relevant columns and may not fully represent "
+    "all pitch types or sequences present in the original Statcast dataset."
+)
 
 # Dropdowns for filters
 prev_pitch_type = st.selectbox(
