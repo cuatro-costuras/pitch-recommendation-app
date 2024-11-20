@@ -19,18 +19,23 @@ pitch_type_mapping = {
 
 # Function to load and filter the dataset
 @st.cache_data
-def load_filtered_data(file_path):
+def load_filtered_data(file_path, year_filter=2021):
     chunks = pd.read_csv(file_path, chunksize=500000)
-    filtered_data = pd.concat([chunk for chunk in chunks], ignore_index=True)
-    return filtered_data
+    
+    # Filter the data by year
+    filtered_data = pd.concat(
+        [chunk[chunk['year'] >= year_filter] for chunk in chunks if 'year' in chunk.columns],
+        ignore_index=True
+    )
     
     # Map pitch types to full names
     filtered_data['pitch_type'] = filtered_data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
-    filtered_data = filtered_data[filtered_data['pitch_type'] != 'Unknown']
+    filtered_data = filtered_data[filtered_data['pitch_type'] != 'Unknown']  # Remove rows with unmapped pitch types
+    
     return filtered_data
 
 # Load the filtered dataset (only data from 2021 and later)
-data = load_filtered_data('smaller_statcast.csv')
+data = load_filtered_data('smaller_statcast.csv', year_filter=2021)
 
 # Define success criteria
 data['success'] = (
