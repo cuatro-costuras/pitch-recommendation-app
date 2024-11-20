@@ -24,9 +24,6 @@ def load_filtered_data(file_path, year_filter=2021):
 
     filtered_chunks = []
     for chunk in chunks:
-        # Debugging: Print chunk columns
-        print(f"Chunk columns: {chunk.columns.tolist()}")
-
         if 'year' in chunk.columns:
             filtered_chunk = chunk[chunk['year'] >= year_filter]
             if not filtered_chunk.empty:
@@ -35,7 +32,6 @@ def load_filtered_data(file_path, year_filter=2021):
     if filtered_chunks:
         filtered_data = pd.concat(filtered_chunks, ignore_index=True)
     else:
-        print("No data matched the filtering criteria.")
         filtered_data = pd.DataFrame(columns=['pitch_type', 'p_throws', 'stand', 'events', 'description', 'launch_speed', 'year'])
 
     # Map pitch types to full names
@@ -48,17 +44,17 @@ def load_filtered_data(file_path, year_filter=2021):
 # Load the filtered dataset
 data = load_filtered_data('smaller_statcast.csv', year_filter=2021)
 
-# Check if the dataset is empty
+# Add fallback data if the dataset is empty
 if data.empty:
-    st.warning("The dataset is empty or does not match the filtering criteria.")
+    fallback_rows = 3
     data = pd.DataFrame({
-        'pitch_type': ['Four-Seam Fastball', 'Slider', 'Changeup'],
-        'p_throws': ['R', 'L'],
-        'stand': ['R', 'L'],
-        'events': [],
-        'description': [],
-        'launch_speed': [],
-        'year': []
+        'pitch_type': ['Four-Seam Fastball', 'Slider', 'Changeup'] * fallback_rows,
+        'p_throws': ['R', 'L', 'R'] * fallback_rows,
+        'stand': ['R', 'L', 'R'] * fallback_rows,
+        'events': [None] * fallback_rows,
+        'description': [None] * fallback_rows,
+        'launch_speed': [None] * fallback_rows,
+        'year': [2021] * fallback_rows
     })
 
 # Add success criteria
