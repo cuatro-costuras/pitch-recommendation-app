@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
+import requests
 import os
+from io import BytesIO
 
 # Dictionary to map pitch acronyms to full names
 pitch_type_mapping = {
@@ -18,24 +20,29 @@ pitch_type_mapping = {
     "CS": "Slow Curve",
 }
 
-# Function to load and concatenate all available files
+# Function to download and load monthly files from GitHub
 @st.cache_data
-def load_all_data():
-    # Base path for the files
-    base_path = './'  # Adjust if files are in a subdirectory
+def load_all_data_from_github():
+    # Base URL for your GitHub repository
+    base_url = "https://github.com/cuatro-costuras/pitch-recommendation-app"
 
     # Initialize an empty DataFrame
     combined_data = pd.DataFrame()
 
     # Loop through all files matching the naming pattern
-    for year in [2022, 2023]:  # Adjust for actual years available
-        for month in range(1, 13):  # Months 1 to 12
+    for year in [2022, 2023]:
+        for month in range(1, 13):
             file_name = f'statcast_{year}_{month:02d}.csv.gz'
-            file_path = os.path.join(base_path, file_name)
+            file_url = f"{base_url}{file_name}"
 
             try:
-                # Load the monthly file
-                data = pd.read_csv(file_path, compression='gzip')
+                # Download the file from GitHub
+                response = requests.get(file_url)
+                response.raise_for_status()  # Ensure the request was successful
+                file_content = BytesIO(response.content)
+
+                # Load the file content into a DataFrame
+                data = pd.read_csv(file_content, compression='gzip')
 
                 # Map pitch types to full names
                 data['pitch_type'] = data['pitch_type'].map(pitch_type_mapping).fillna('Unknown')
@@ -44,19 +51,19 @@ def load_all_data():
                 # Append to the combined DataFrame
                 combined_data = pd.concat([combined_data, data], ignore_index=True)
 
-            except FileNotFoundError:
-                st.warning(f"File not found: {file_name}")
+            except requests.exceptions.HTTPError:
+                st.warning(f"File not found on GitHub: {file_name}")
             except Exception as e:
                 st.error(f"Error loading file {file_name}: {e}")
 
     return combined_data
 
 # Load all data
-data = load_all_data()
+data = load_all_data_from_github()
 
 # Ensure data is loaded before continuing
 if data.empty:
-    st.error("No data available. Please ensure the data files are in the correct directory.")
+    st.error("No data available. Please ensure the data files are uploaded to GitHub.")
 else:
     # Define success criteria
     data['success'] = (
