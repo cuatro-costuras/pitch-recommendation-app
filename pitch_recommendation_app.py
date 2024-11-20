@@ -31,7 +31,7 @@ def load_filtered_data(file_path, year_filter=2021):
     return filtered_data
 
 # Load the filtered dataset (only data from 2021 and later)
-data = load_filtered_data('statcast_last_3_years.csv', year_filter=2021)
+data = load_filtered_data('smaller_statcast.csv', year_filter=2021)
 
 # Define success criteria
 data['success'] = (
